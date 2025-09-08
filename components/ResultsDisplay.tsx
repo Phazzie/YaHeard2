@@ -1,10 +1,13 @@
 'use client';
 
 import { TranscriptionResult } from "@/lib/types";
+import ServiceStatusIndicator from "./ServiceStatusIndicator";
+import CopyButton from "./CopyButton";
 
 interface ResultsDisplayProps {
   results: TranscriptionResult[];
   appStatus: string;
+  healthStatus: Record<string, 'operational' | 'down'>;
 }
 
 const accentColors = [
@@ -34,7 +37,7 @@ const SkeletonCard = () => (
   </div>
 );
 
-export default function ResultsDisplay({ results, appStatus }: ResultsDisplayProps) {
+export default function ResultsDisplay({ results, appStatus, healthStatus }: ResultsDisplayProps) {
   if (appStatus === 'processing') {
     return (
       <div className="w-full max-w-4xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -56,9 +59,15 @@ export default function ResultsDisplay({ results, appStatus }: ResultsDisplayPro
             key={result.serviceName}
             className={`bg-white/5 rounded-xl p-6 border ${accentColors[index % accentColors.length]} shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1`}
           >
-            <h3 className={`text-xl font-bold mb-3 ${accentTextColors[index % accentTextColors.length]}`}>
-              {result.serviceName}
-            </h3>
+            <div className="flex justify-between items-start mb-3">
+              <h3 className={`text-xl font-bold ${accentTextColors[index % accentTextColors.length]}`}>
+                {result.serviceName}
+              </h3>
+              <div className="flex items-center space-x-3">
+                <ServiceStatusIndicator status={healthStatus[result.serviceName] || 'down'} />
+                {result.transcription && <CopyButton textToCopy={result.transcription} />}
+              </div>
+            </div>
             {result.error ? (
               <p className="text-red-400 font-mono text-sm">{result.error}</p>
             ) : (

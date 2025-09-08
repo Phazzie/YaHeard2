@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FileUploader from '@/components/FileUploader';
 import ResultsDisplay from '@/components/ResultsDisplay';
+import ConsensusDisplay from '@/components/ConsensusDisplay';
 import { TranscriptionResult } from '@/lib/types';
 
 type AppStatus = 'idle' | 'uploading' | 'processing' | 'success' | 'error';
@@ -10,12 +11,30 @@ type AppStatus = 'idle' | 'uploading' | 'processing' | 'success' | 'error';
 export default function Home() {
   const [appStatus, setAppStatus] = useState<AppStatus>('idle');
   const [results, setResults] = useState<TranscriptionResult[]>([]);
+  const [consensus, setConsensus] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [serviceHealth, setServiceHealth] = useState<Record<string, 'operational' | 'down'>>({});
+
+  useEffect(() => {
+    const fetchHealth = async () => {
+      try {
+        const response = await fetch('/api/health');
+        if (response.ok) {
+          const data = await response.json();
+          setServiceHealth(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch service health:", err);
+      }
+    };
+    fetchHealth();
+  }, []);
 
   const handleUploadSuccess = async (publicUrl: string) => {
     setAppStatus('processing');
     setError(null);
     setResults([]);
+    setConsensus('');
 
     try {
       const response = await fetch('/api/transcribe', {
@@ -29,8 +48,9 @@ export default function Home() {
         throw new Error(errorData.error || 'Transcription failed');
       }
 
-      const data: TranscriptionResult[] = await response.json();
-      setResults(data);
+      const { consensus, individualResults } = await response.json();
+      setResults(individualResults);
+      setConsensus(consensus);
       setAppStatus('success');
 
     } catch (err) {
@@ -65,7 +85,8 @@ export default function Home() {
         />
       ) : (
         <>
-          <ResultsDisplay results={results} appStatus={appStatus} />
+          {consensus && <ConsensusDisplay consensusText={consensus} />}
+          <ResultsDisplay results={results} appStatus={appStatus} healthStatus={serviceHealth} />
           {error && (
             <div className="mt-8 text-center p-4 bg-red-900/50 border border-red-500 rounded-lg">
               <p className="text-red-400 font-bold">An Error Occurred</p>

@@ -4,6 +4,7 @@
 export interface TranscriptionService {
   name: string;
   transcribe(audioUrl: string): Promise<TranscriptionResult>;
+  checkHealth(): Promise<'operational' | 'down'>;
 }
 
 /**

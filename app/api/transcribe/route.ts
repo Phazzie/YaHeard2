@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { readdir } from 'fs/promises';
 import path from 'path';
 import { TranscriptionService, TranscriptionResult } from '@/lib/types';
+import { generateConsensus } from '@/lib/consensus';
 
 async function getTranscriptionServices(): Promise<TranscriptionService[]> {
   const servicesDir = path.join(process.cwd(), 'lib/services');
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
 
     const results = await Promise.allSettled(transcriptionPromises);
 
-    const formattedResults: TranscriptionResult[] = results.map((result, index) => {
+    const individualResults: TranscriptionResult[] = results.map((result, index) => {
       if (result.status === 'fulfilled') {
         return result.value;
       } else {
@@ -49,7 +50,12 @@ export async function POST(request: Request) {
       }
     });
 
-    return NextResponse.json(formattedResults);
+    const consensus = generateConsensus(individualResults);
+
+    return NextResponse.json({
+      consensus,
+      individualResults,
+    });
 
   } catch (error) {
     console.error('Transcription Orchestrator Error:', error);

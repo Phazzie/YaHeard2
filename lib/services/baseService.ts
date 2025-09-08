@@ -47,4 +47,13 @@ export abstract class BaseTranscriptionService implements TranscriptionService {
       };
     }
   }
+
+  /**
+   * Performs a basic health check for the service.
+   * The default implementation considers the service "operational" if the API key is configured.
+   * Subclasses can override this for more specific health checks (e.g., pinging a status endpoint).
+   */
+  public async checkHealth(): Promise<'operational' | 'down'> {
+    return this.apiKey ? 'operational' : 'down';
+  }
 }
