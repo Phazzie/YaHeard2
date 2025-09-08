@@ -1,0 +1,50 @@
+import { TranscriptionService, TranscriptionResult } from '../types';
+
+/**
+ * An abstract base class for transcription services to handle common logic
+ * like API key checks and standardized error handling.
+ */
+export abstract class BaseTranscriptionService implements TranscriptionService {
+  /**
+   * The unique name of the transcription service.
+   */
+  abstract readonly name: string;
+
+  /**
+   * The API key for the service, read from environment variables.
+   */
+  protected abstract readonly apiKey: string | undefined;
+
+  /**
+   * The core transcription logic that must be implemented by each subclass.
+   * @param audioUrl The public URL of the audio file to transcribe.
+   * @returns A promise that resolves to a TranscriptionResult.
+   */
+  protected abstract performTranscription(audioUrl: string): Promise<TranscriptionResult>;
+
+  /**
+   * The public-facing `transcribe` method that acts as a template.
+   * It wraps the core logic with API key checks and a try-catch block.
+   */
+  public async transcribe(audioUrl: string): Promise<TranscriptionResult> {
+    if (!this.apiKey) {
+      return {
+        serviceName: this.name,
+        transcription: null,
+        error: `API key for ${this.name} is not configured.`,
+      };
+    }
+
+    try {
+      return await this.performTranscription(audioUrl);
+    } catch (error) {
+      console.error(`${this.name} Error:`, error);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      return {
+        serviceName: this.name,
+        transcription: null,
+        error: errorMessage,
+      };
+    }
+  }
+}
