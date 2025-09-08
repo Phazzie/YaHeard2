@@ -1,42 +1,42 @@
-import React, { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
+import React, { useCallback, useState } from 'react'
+import { useDropzone } from 'react-dropzone'
 
 const FileUpload = ({ onFileUploaded, isUploading, onUploadStart }) => {
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [dragActive, setDragActive] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [dragActive, setDragActive] = useState(false)
 
   const onDrop = useCallback(async (acceptedFiles, rejectedFiles) => {
     if (rejectedFiles.length > 0) {
-      alert('Please select a valid audio file (MP3, WAV, M4A, OGG, WebM)');
-      return;
+      console.error('Invalid file type selected. Please select a valid audio file (MP3, WAV, M4A, OGG, WebM)')
+      return
     }
 
-    const file = acceptedFiles[0];
-    if (!file) return;
+    const file = acceptedFiles[0]
+    if (!file) return
 
     try {
-      onUploadStart && onUploadStart();
-      setUploadProgress(0);
+      onUploadStart && onUploadStart()
+      setUploadProgress(0)
 
       // Import API service dynamically to avoid circular dependencies
-      const { default: apiService } = await import('../services/api');
-      
+      const { default: apiService } = await import('../services/api')
+
       const result = await apiService.uploadFile(file, (progress) => {
-        setUploadProgress(progress);
-      });
+        setUploadProgress(progress)
+      })
 
       if (result.success) {
-        onFileUploaded(result.file);
-        setUploadProgress(0);
+        onFileUploaded(result.file)
+        setUploadProgress(0)
       } else {
-        throw new Error(result.error || 'Upload failed');
+        throw new Error(result.error || 'Upload failed')
       }
     } catch (error) {
-      console.error('Upload error:', error);
-      alert(`Upload failed: ${error.message || 'Unknown error'}`);
-      setUploadProgress(0);
+      console.error('Upload error:', error)
+      console.error(`Upload failed: ${error.message || 'Unknown error'}`)
+      setUploadProgress(0)
     }
-  }, [onFileUploaded, onUploadStart]);
+  }, [onFileUploaded, onUploadStart])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -48,29 +48,31 @@ const FileUpload = ({ onFileUploaded, isUploading, onUploadStart }) => {
     onDragEnter: () => setDragActive(true),
     onDragLeave: () => setDragActive(false),
     disabled: isUploading
-  });
+  })
 
   return (
     <div className="upload-section">
-      <div 
-        {...getRootProps()} 
+      <div
+        {...getRootProps()}
         className={`upload-zone ${isDragActive || dragActive ? 'drag-active' : ''} ${isUploading ? 'uploading' : ''}`}
       >
         <input {...getInputProps()} />
-        
-        {isUploading ? (
+
+        {isUploading
+          ? (
           <div className="upload-progress">
             <div className="loading-spinner"></div>
             <h3>Uploading...</h3>
             <div className="progress-bar">
-              <div 
-                className="progress-fill" 
+              <div
+                className="progress-fill"
                 style={{ width: `${uploadProgress}%` }}
               ></div>
             </div>
             <p>{uploadProgress}% complete</p>
           </div>
-        ) : (
+            )
+          : (
           <>
             <div className="upload-icon">🎵</div>
             <h3>Drop your audio file here</h3>
@@ -80,7 +82,7 @@ const FileUpload = ({ onFileUploaded, isUploading, onUploadStart }) => {
               <span>Max size: 100MB</span>
             </div>
           </>
-        )}
+            )}
       </div>
 
       <style jsx>{`
@@ -140,7 +142,7 @@ const FileUpload = ({ onFileUploaded, isUploading, onUploadStart }) => {
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default FileUpload;
+export default FileUpload

@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React from 'react'
 
 const TranscriptionResults = ({ results, isLoading, analysis }) => {
   if (isLoading) {
@@ -17,15 +18,15 @@ const TranscriptionResults = ({ results, isLoading, analysis }) => {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (!results || results.length === 0) {
-    return null;
+    return null
   }
 
-  const successfulResults = results.filter(r => !r.error);
-  const failedResults = results.filter(r => r.error);
+  const successfulResults = results.filter(r => !r.error)
+  const failedResults = results.filter(r => r.error)
 
   return (
     <div className="results-section">
@@ -75,7 +76,7 @@ const TranscriptionResults = ({ results, isLoading, analysis }) => {
         {successfulResults.map((result, index) => (
           <TranscriptionCard key={index} result={result} />
         ))}
-        
+
         {failedResults.map((result, index) => (
           <ErrorCard key={`error-${index}`} result={result} />
         ))}
@@ -141,25 +142,25 @@ const TranscriptionResults = ({ results, isLoading, analysis }) => {
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
 const TranscriptionCard = ({ result }) => {
   const formatDuration = (seconds) => {
-    if (!seconds) return null;
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+    if (!seconds) return null
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   const copyToClipboard = async (text) => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(text)
       // You could add a toast notification here
     } catch (err) {
-      console.error('Failed to copy text:', err);
+      console.error('Failed to copy text:', err)
     }
-  };
+  }
 
   return (
     <div className="result-card success">
@@ -167,11 +168,11 @@ const TranscriptionCard = ({ result }) => {
         <span>{result.service}</span>
         <span className="service-badge success">✓ Success</span>
       </div>
-      
+
       <div className="transcription-text">
         {result.text}
       </div>
-      
+
       <div className="result-metadata">
         {result.confidence && (
           <div className="metadata-item">
@@ -181,30 +182,30 @@ const TranscriptionCard = ({ result }) => {
             </span>
           </div>
         )}
-        
+
         {result.duration && (
           <div className="metadata-item">
             <span>Duration:</span>
             <span>{formatDuration(result.duration)}</span>
           </div>
         )}
-        
+
         {result.language && (
           <div className="metadata-item">
             <span>Language:</span>
             <span>{result.language.toUpperCase()}</span>
           </div>
         )}
-        
+
         <div className="metadata-item">
           <span>Words:</span>
           <span>{result.text.split(/\s+/).length}</span>
         </div>
       </div>
-      
+
       <div className="result-actions">
-        <button 
-          className="btn btn-secondary" 
+        <button
+          className="btn btn-secondary"
           onClick={() => copyToClipboard(result.text)}
           title="Copy transcription"
         >
@@ -256,8 +257,8 @@ const TranscriptionCard = ({ result }) => {
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
 const ErrorCard = ({ result }) => {
   return (
@@ -266,14 +267,14 @@ const ErrorCard = ({ result }) => {
         <span>{result.service || result.serviceName}</span>
         <span className="service-badge error">✗ Error</span>
       </div>
-      
+
       <div className="error-message">
         <p>{result.message || 'An unknown error occurred'}</p>
         {result.code && (
           <span className="error-code">Error Code: {result.code}</span>
         )}
       </div>
-      
+
       <style jsx>{`
         .error-message {
           background: rgba(239, 68, 68, 0.1);
@@ -295,7 +296,7 @@ const ErrorCard = ({ result }) => {
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default TranscriptionResults;
+export default TranscriptionResults

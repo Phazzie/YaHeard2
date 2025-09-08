@@ -56,7 +56,9 @@
     "collectCoverageFrom": [
       "server/**/*.js",
       "!server/tests/**"
-    ]
+    ],
+    "forceExit": true,
+    "testTimeout": 10000
   },
   "engines": {
     "node": ">=18.0.0"

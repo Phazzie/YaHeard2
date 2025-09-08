@@ -1,71 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import './styles/App.css';
-import FileUpload from './components/FileUpload';
-import TranscriptionResults from './components/TranscriptionResults';
-import ServiceStatus from './components/ServiceStatus';
-import apiService from './services/api';
+import React, { useState, useEffect } from 'react'
+import './styles/App.css'
+import FileUpload from './components/FileUpload'
+import TranscriptionResults from './components/TranscriptionResults'
+import ServiceStatus from './components/ServiceStatus'
+import apiService from './services/api'
 
-function App() {
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [transcriptionResults, setTranscriptionResults] = useState(null);
-  const [error, setError] = useState(null);
+function App () {
+  const [uploadedFile, setUploadedFile] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const [transcriptionResults, setTranscriptionResults] = useState(null)
+  const [error, setError] = useState(null)
 
   const handleFileUploaded = (file) => {
-    setUploadedFile(file);
-    setError(null);
-  };
+    setUploadedFile(file)
+    setError(null)
+  }
 
   const handleUploadStart = () => {
-    setIsUploading(true);
-    setError(null);
-  };
+    setIsUploading(true)
+    setError(null)
+  }
 
   const handleUploadComplete = () => {
-    setIsUploading(false);
-  };
+    setIsUploading(false)
+  }
 
   const startTranscription = async () => {
     if (!uploadedFile) {
-      setError('Please upload an audio file first');
-      return;
+      setError('Please upload an audio file first')
+      return
     }
 
     try {
-      setIsTranscribing(true);
-      setError(null);
-      setTranscriptionResults(null);
+      setIsTranscribing(true)
+      setError(null)
+      setTranscriptionResults(null)
 
-      const result = await apiService.transcribeAudio(uploadedFile.url);
-      
+      const result = await apiService.transcribeAudio(uploadedFile.url)
+
       if (result.success) {
-        setTranscriptionResults(result);
+        setTranscriptionResults(result)
       } else {
-        throw new Error(result.message || 'Transcription failed');
+        throw new Error(result.message || 'Transcription failed')
       }
     } catch (err) {
-      setError(err.message || 'An error occurred during transcription');
-      console.error('Transcription error:', err);
+      setError(err.message || 'An error occurred during transcription')
+      console.error('Transcription error:', err)
     } finally {
-      setIsTranscribing(false);
+      setIsTranscribing(false)
     }
-  };
+  }
 
   const resetAll = () => {
-    setUploadedFile(null);
-    setTranscriptionResults(null);
-    setError(null);
-    setIsUploading(false);
-    setIsTranscribing(false);
-  };
+    setUploadedFile(null)
+    setTranscriptionResults(null)
+    setError(null)
+    setIsUploading(false)
+    setIsTranscribing(false)
+  }
 
   // Effect to handle upload completion
   useEffect(() => {
     if (uploadedFile && isUploading) {
-      handleUploadComplete();
+      handleUploadComplete()
     }
-  }, [uploadedFile, isUploading]);
+  }, [uploadedFile, isUploading])
 
   return (
     <div className="App">
@@ -73,7 +73,7 @@ function App() {
         <header className="header">
           <h1>YaHeard2</h1>
           <p>
-            Compare AI transcription services side-by-side. Upload your audio file and see how 
+            Compare AI transcription services side-by-side. Upload your audio file and see how
             different AI models transcribe the same content.
           </p>
         </header>
@@ -83,12 +83,12 @@ function App() {
 
           <div className="upload-section card">
             <h2>🎵 Upload Audio File</h2>
-            <FileUpload 
+            <FileUpload
               onFileUploaded={handleFileUploaded}
               isUploading={isUploading}
               onUploadStart={handleUploadStart}
             />
-            
+
             {uploadedFile && (
               <div className="uploaded-file-info">
                 <div className="file-details">
@@ -99,17 +99,17 @@ function App() {
                     <span><strong>Type:</strong> {uploadedFile.mimetype}</span>
                   </div>
                 </div>
-                
+
                 <div className="action-buttons">
-                  <button 
+                  <button
                     className="btn btn-primary"
                     onClick={startTranscription}
                     disabled={isTranscribing}
                   >
                     {isTranscribing ? '🔄 Transcribing...' : '🚀 Start Transcription'}
                   </button>
-                  
-                  <button 
+
+                  <button
                     className="btn btn-secondary"
                     onClick={resetAll}
                     disabled={isTranscribing}
@@ -131,7 +131,7 @@ function App() {
             </div>
           )}
 
-          <TranscriptionResults 
+          <TranscriptionResults
             results={transcriptionResults?.results}
             isLoading={isTranscribing}
             analysis={transcriptionResults?.analysis}
@@ -231,7 +231,7 @@ function App() {
         }
       `}</style>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

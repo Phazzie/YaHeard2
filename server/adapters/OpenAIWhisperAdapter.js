@@ -1,40 +1,40 @@
-const TranscriptionService = require('../services/TranscriptionService');
-const OpenAI = require('openai');
-const fs = require('fs');
-const axios = require('axios');
+const TranscriptionService = require('../services/TranscriptionService')
+const OpenAI = require('openai')
+const fs = require('fs')
+const axios = require('axios')
 
 class OpenAIWhisperAdapter extends TranscriptionService {
-  constructor(config) {
-    super(config);
-    this.serviceName = 'OpenAI Whisper';
-    
+  constructor (config) {
+    super(config)
+    this.serviceName = 'OpenAI Whisper'
+
     if (config.apiKey) {
       this.client = new OpenAI({
         apiKey: config.apiKey
-      });
-      this.isConfigured = true;
+      })
+      this.isConfigured = true
     }
   }
 
-  getSupportedFeatures() {
-    return ['transcription', 'translation', 'language-detection'];
+  getSupportedFeatures () {
+    return ['transcription', 'translation', 'language-detection']
   }
 
-  async transcribe(audioUrl, options = {}) {
+  async transcribe (audioUrl, options = {}) {
     if (!this.isReady()) {
-      return this.handleError(new Error('OpenAI API key not configured'));
+      return this.handleError(new Error('OpenAI API key not configured'))
     }
 
     try {
-      const validatedOptions = this.validateOptions(options);
-      
+      const validatedOptions = this.validateOptions(options)
+
       // Download audio file if it's a URL
-      let audioFile;
+      let audioFile
       if (audioUrl.startsWith('http')) {
-        const response = await axios.get(audioUrl, { responseType: 'stream' });
-        audioFile = response.data;
+        const response = await axios.get(audioUrl, { responseType: 'stream' })
+        audioFile = response.data
       } else {
-        audioFile = fs.createReadStream(audioUrl);
+        audioFile = fs.createReadStream(audioUrl)
       }
 
       const transcription = await this.client.audio.transcriptions.create({
@@ -43,34 +43,33 @@ class OpenAIWhisperAdapter extends TranscriptionService {
         language: validatedOptions.language === 'auto' ? undefined : validatedOptions.language,
         response_format: 'verbose_json',
         timestamp_granularities: ['word']
-      });
+      })
 
       return this.formatResult(transcription.text, {
         language: transcription.language,
         duration: transcription.duration,
         words: transcription.words,
         model: 'whisper-1'
-      });
-
+      })
     } catch (error) {
-      return this.handleError(error);
+      return this.handleError(error)
     }
   }
 
-  validateOptions(options) {
-    const validated = super.validateOptions(options);
-    
+  validateOptions (options) {
+    const validated = super.validateOptions(options)
+
     // OpenAI Whisper specific validations
     if (validated.language && validated.language !== 'auto') {
       // Validate language code format (ISO 639-1)
-      const validLanguages = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'];
+      const validLanguages = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh']
       if (!validLanguages.includes(validated.language)) {
-        validated.language = 'auto';
+        validated.language = 'auto'
       }
     }
 
-    return validated;
+    return validated
   }
 }
 
-module.exports = OpenAIWhisperAdapter;
+module.exports = OpenAIWhisperAdapter

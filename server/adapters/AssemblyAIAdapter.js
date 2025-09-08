@@ -1,31 +1,31 @@
-const TranscriptionService = require('../services/TranscriptionService');
-const { AssemblyAI } = require('assemblyai');
+const TranscriptionService = require('../services/TranscriptionService')
+const { AssemblyAI } = require('assemblyai')
 
 class AssemblyAIAdapter extends TranscriptionService {
-  constructor(config) {
-    super(config);
-    this.serviceName = 'AssemblyAI';
-    
+  constructor (config) {
+    super(config)
+    this.serviceName = 'AssemblyAI'
+
     if (config.apiKey) {
       this.client = new AssemblyAI({
         apiKey: config.apiKey
-      });
-      this.isConfigured = true;
+      })
+      this.isConfigured = true
     }
   }
 
-  getSupportedFeatures() {
-    return ['transcription', 'speaker-detection', 'sentiment-analysis', 'topic-detection'];
+  getSupportedFeatures () {
+    return ['transcription', 'speaker-detection', 'sentiment-analysis', 'topic-detection']
   }
 
-  async transcribe(audioUrl, options = {}) {
+  async transcribe (audioUrl, options = {}) {
     if (!this.isReady()) {
-      return this.handleError(new Error('AssemblyAI API key not configured'));
+      return this.handleError(new Error('AssemblyAI API key not configured'))
     }
 
     try {
-      const validatedOptions = this.validateOptions(options);
-      
+      const validatedOptions = this.validateOptions(options)
+
       const config = {
         audio_url: audioUrl,
         speaker_labels: true,
@@ -33,19 +33,19 @@ class AssemblyAIAdapter extends TranscriptionService {
         auto_highlights: true,
         punctuate: true,
         format_text: true
-      };
-
-      if (validatedOptions.language && validatedOptions.language !== 'auto') {
-        config.language_code = validatedOptions.language;
       }
 
-      const transcript = await this.client.transcripts.create(config);
-      
+      if (validatedOptions.language && validatedOptions.language !== 'auto') {
+        config.language_code = validatedOptions.language
+      }
+
+      const transcript = await this.client.transcripts.create(config)
+
       // Wait for transcription to complete
-      const completedTranscript = await this.client.transcripts.waitUntilReady(transcript.id);
+      const completedTranscript = await this.client.transcripts.waitUntilReady(transcript.id)
 
       if (completedTranscript.status === 'error') {
-        throw new Error(completedTranscript.error);
+        throw new Error(completedTranscript.error)
       }
 
       return this.formatResult(completedTranscript.text, {
@@ -56,27 +56,26 @@ class AssemblyAIAdapter extends TranscriptionService {
         sentiment: completedTranscript.sentiment_analysis_results,
         highlights: completedTranscript.auto_highlights_result?.results,
         words: completedTranscript.words
-      });
-
+      })
     } catch (error) {
-      return this.handleError(error);
+      return this.handleError(error)
     }
   }
 
-  validateOptions(options) {
-    const validated = super.validateOptions(options);
-    
+  validateOptions (options) {
+    const validated = super.validateOptions(options)
+
     // AssemblyAI specific validations
     const supportedLanguages = [
       'en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'hi', 'ja', 'zh', 'ko', 'ru'
-    ];
-    
+    ]
+
     if (validated.language && validated.language !== 'auto' && !supportedLanguages.includes(validated.language)) {
-      validated.language = 'auto';
+      validated.language = 'auto'
     }
 
-    return validated;
+    return validated
   }
 }
 
-module.exports = AssemblyAIAdapter;
+module.exports = AssemblyAIAdapter

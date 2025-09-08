@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config()
 
 module.exports = {
   // Server config
@@ -27,14 +27,14 @@ module.exports = {
   CORS_ORIGINS: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:3001'],
 
   // Validation
-  isValid() {
+  isValid () {
     // Check if at least one AI service is configured
     const hasAIService = !!(
       this.OPENAI_API_KEY ||
       this.ASSEMBLYAI_API_KEY ||
       this.GEMINI_API_KEY ||
       this.ELEVENLABS_API_KEY
-    );
+    )
 
     // Check if Spaces is configured
     const hasSpaces = !!(
@@ -43,7 +43,7 @@ module.exports = {
       this.SPACES_ENDPOINT &&
       this.SPACES_ACCESS_KEY_ID &&
       this.SPACES_SECRET_ACCESS_KEY
-    );
+    )
 
     return {
       valid: hasAIService && hasSpaces,
@@ -55,6 +55,6 @@ module.exports = {
         gemini: !!this.GEMINI_API_KEY,
         elevenlabs: !!this.ELEVENLABS_API_KEY
       }
-    };
+    }
   }
-};
+}

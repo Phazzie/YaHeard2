@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import apiService from '../services/api';
+import React, { useState, useEffect } from 'react'
+import apiService from '../services/api'
 
 const ServiceStatus = () => {
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [services, setServices] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    loadServices();
-  }, []);
+    loadServices()
+  }, [])
 
   const loadServices = async () => {
     try {
-      setLoading(true);
-      const data = await apiService.getServices();
-      setServices(data.transcription.services || []);
-      setError(null);
+      setLoading(true)
+      const data = await apiService.getServices()
+      setServices(data.transcription.services || [])
+      setError(null)
     } catch (err) {
-      setError(err.message);
+      setError(err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   if (loading) {
     return (
@@ -33,7 +33,7 @@ const ServiceStatus = () => {
           <div className="loading-dot"></div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -45,7 +45,7 @@ const ServiceStatus = () => {
           Retry
         </button>
       </div>
-    );
+    )
   }
 
   return (
@@ -56,7 +56,7 @@ const ServiceStatus = () => {
           <ServiceCard key={index} service={service} />
         ))}
       </div>
-      
+
       {services.length === 0 && (
         <div className="no-services">
           <p>No AI transcription services are currently configured.</p>
@@ -107,27 +107,18 @@ const ServiceStatus = () => {
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
 const ServiceCard = ({ service }) => {
   const getServiceEmoji = (name) => {
-    const nameLC = name.toLowerCase();
-    if (nameLC.includes('openai') || nameLC.includes('whisper')) return '🤖';
-    if (nameLC.includes('assemblyai')) return '🎯';
-    if (nameLC.includes('gemini')) return '💎';
-    if (nameLC.includes('elevenlabs')) return '🔊';
-    return '⚡';
-  };
-
-  const getServiceColor = (name) => {
-    const nameLC = name.toLowerCase();
-    if (nameLC.includes('openai') || nameLC.includes('whisper')) return '#10b981';
-    if (nameLC.includes('assemblyai')) return '#3b82f6';
-    if (nameLC.includes('gemini')) return '#8b5cf6';
-    if (nameLC.includes('elevenlabs')) return '#f59e0b';
-    return '#6366f1';
-  };
+    const nameLC = name.toLowerCase()
+    if (nameLC.includes('openai') || nameLC.includes('whisper')) return '🤖'
+    if (nameLC.includes('assemblyai')) return '🎯'
+    if (nameLC.includes('gemini')) return '💎'
+    if (nameLC.includes('elevenlabs')) return '🔊'
+    return '⚡'
+  }
 
   return (
     <div className="service-card">
@@ -141,7 +132,7 @@ const ServiceCard = ({ service }) => {
           </span>
         </div>
       </div>
-      
+
       {service.features && service.features.length > 0 && (
         <div className="service-features">
           <span className="features-label">Features:</span>
@@ -220,7 +211,7 @@ const ServiceCard = ({ service }) => {
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default ServiceStatus;
+export default ServiceStatus
