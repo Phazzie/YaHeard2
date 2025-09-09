@@ -39,7 +39,15 @@ export abstract class BaseTranscriptionService implements TranscriptionService {
       return await this.performTranscription(audioUrl);
     } catch (error) {
       console.error(`${this.name} Error:`, error);
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      let errorMessage = 'An unknown error occurred.';
+      if (error instanceof Error) {
+        // Check for common API key-related error messages
+        if (error.message.toLowerCase().includes('api key') || error.message.toLowerCase().includes('authentication')) {
+          errorMessage = `Authentication error. Please check the API key for ${this.name}.`;
+        } else {
+          errorMessage = error.message;
+        }
+      }
       return {
         serviceName: this.name,
         transcription: null,

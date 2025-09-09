@@ -3,17 +3,26 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
 
-// Initialize the S3 client with DigitalOcean Spaces configuration
-const s3Client = new S3Client({
-  endpoint: `https://${process.env.SPACES_ENDPOINT}`,
-  region: process.env.SPACES_REGION,
-  credentials: {
-    accessKeyId: process.env.SPACES_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.SPACES_SECRET_ACCESS_KEY!,
-  },
-});
-
 export async function POST(request: Request) {
+  const { SPACES_ENDPOINT, SPACES_REGION, SPACES_ACCESS_KEY_ID, SPACES_SECRET_ACCESS_KEY, SPACES_BUCKET_NAME } = process.env;
+
+  if (!SPACES_ENDPOINT || !SPACES_REGION || !SPACES_ACCESS_KEY_ID || !SPACES_SECRET_ACCESS_KEY || !SPACES_BUCKET_NAME) {
+    return new Response(JSON.stringify({ error: 'Storage service is not configured. Please check your environment variables.' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Initialize the S3 client with DigitalOcean Spaces configuration
+  const s3Client = new S3Client({
+    endpoint: `https://${SPACES_ENDPOINT}`,
+    region: SPACES_REGION,
+    credentials: {
+      accessKeyId: SPACES_ACCESS_KEY_ID,
+      secretAccessKey: SPACES_SECRET_ACCESS_KEY,
+    },
+  });
+
   try {
     const { filename, fileType } = await request.json();
 

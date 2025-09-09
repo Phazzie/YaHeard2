@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useToasts } from '@/contexts/ToastContext';
 
 interface CopyButtonProps {
   textToCopy: string;
@@ -8,13 +9,16 @@ interface CopyButtonProps {
 
 export default function CopyButton({ textToCopy }: CopyButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
+  const { addToast } = useToasts();
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(textToCopy);
+      addToast('Copied to clipboard!', 'success');
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+      setTimeout(() => setIsCopied(false), 2000); // Keep visual feedback on button
     } catch (err) {
+      addToast('Failed to copy text.', 'error');
       console.error('Failed to copy text: ', err);
     }
   };

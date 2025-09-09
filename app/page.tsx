@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useToasts } from '@/contexts/ToastContext';
 import FileUploader from '@/components/FileUploader';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import ConsensusDisplay from '@/components/ConsensusDisplay';
@@ -12,7 +13,7 @@ export default function Home() {
   const [appStatus, setAppStatus] = useState<AppStatus>('idle');
   const [results, setResults] = useState<TranscriptionResult[]>([]);
   const [consensus, setConsensus] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const { addToast } = useToasts();
   const [serviceHealth, setServiceHealth] = useState<Record<string, 'operational' | 'down'>>({});
 
   useEffect(() => {
@@ -32,7 +33,6 @@ export default function Home() {
 
   const handleUploadSuccess = async (publicUrl: string) => {
     setAppStatus('processing');
-    setError(null);
     setResults([]);
     setConsensus('');
 
@@ -55,7 +55,7 @@ export default function Home() {
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      setError(errorMessage);
+      addToast(errorMessage, 'error');
       setAppStatus('error');
     }
   };
@@ -63,7 +63,6 @@ export default function Home() {
   const resetApp = () => {
     setAppStatus('idle');
     setResults([]);
-    setError(null);
   };
 
   return (
@@ -87,12 +86,6 @@ export default function Home() {
         <>
           {consensus && <ConsensusDisplay consensusText={consensus} />}
           <ResultsDisplay results={results} appStatus={appStatus} healthStatus={serviceHealth} />
-          {error && (
-            <div className="mt-8 text-center p-4 bg-red-900/50 border border-red-500 rounded-lg">
-              <p className="text-red-400 font-bold">An Error Occurred</p>
-              <p className="text-red-400">{error}</p>
-            </div>
-          )}
           <button
             onClick={resetApp}
             className="mt-12 py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-300"
