@@ -1,0 +1,27 @@
+
+> yaheard2@1.0.0 start
+> node server/index.js
+
+🚀 YaHeard2 server running on port 3000
+📊 Environment: production
+⚙️  Configuration: {
+  valid: false,
+  aiServices: false,
+  storage: false,
+  configuredServices: {
+    openai: false,
+    assemblyai: false,
+    gemini: false,
+    elevenlabs: false
+  }
+}
+⚠️  Warning: Server started with incomplete configuration
+   - No AI transcription services configured
+   - DigitalOcean Spaces not configured
+🌐 Access the API at: http://localhost:3000
+(node:3654) NOTE: The AWS SDK for JavaScript (v2) is in maintenance mode.
+ SDK releases are limited to address critical bug fixes and security issues only.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+(Use `node --trace-warnings ...` to show where the warning was created)
