@@ -1,6 +1,5 @@
 const TranscriptionService = require('../services/TranscriptionService')
 const OpenAI = require('openai')
-const fs = require('fs')
 const axios = require('axios')
 
 class OpenAIWhisperAdapter extends TranscriptionService {
@@ -28,14 +27,9 @@ class OpenAIWhisperAdapter extends TranscriptionService {
     try {
       const validatedOptions = this.validateOptions(options)
 
-      // Download audio file if it's a URL
-      let audioFile
-      if (audioUrl.startsWith('http')) {
-        const response = await axios.get(audioUrl, { responseType: 'stream' })
-        audioFile = response.data
-      } else {
-        audioFile = fs.createReadStream(audioUrl)
-      }
+      // The OpenAI SDK expects a file stream. We can create one from the URL.
+      const response = await axios.get(audioUrl, { responseType: 'stream' })
+      const audioFile = response.data
 
       const transcription = await this.client.audio.transcriptions.create({
         file: audioFile,
@@ -57,18 +51,8 @@ class OpenAIWhisperAdapter extends TranscriptionService {
   }
 
   validateOptions (options) {
-    const validated = super.validateOptions(options)
-
-    // OpenAI Whisper specific validations
-    if (validated.language && validated.language !== 'auto') {
-      // Validate language code format (ISO 639-1)
-      const validLanguages = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh']
-      if (!validLanguages.includes(validated.language)) {
-        validated.language = 'auto'
-      }
-    }
-
-    return validated
+    // No specific validation needed for Whisper, a part from the base validation.
+    return super.validateOptions(options)
   }
 }
 

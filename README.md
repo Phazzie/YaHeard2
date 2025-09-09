@@ -4,8 +4,8 @@ A modern, modular application for comparing audio transcriptions across multiple
 
 ## 🚀 Features
 
-- **Multi-Service Transcription**: Compare results from OpenAI Whisper, Gemini 2.5 Flash, ElevenLabs, and AssemblyAI
-- **Direct Cloud Upload**: Large audio files uploaded directly to DigitalOcean Spaces
+- **Multi-Service Transcription**: Compare results from OpenAI Whisper, Gemini 2.5 Pro, ElevenLabs, and AssemblyAI
+- **Efficient Audio Handling**: Server-side streaming to AI services for improved performance.
 - **Modern UI**: Vibrant, responsive interface with animations and visual feedback
 - **Modular Architecture**: Extensible design for future analysis features
 - **Real-time Status**: Service availability monitoring and upload progress
@@ -16,9 +16,11 @@ A modern, modular application for comparing audio transcriptions across multiple
 ### Core Components
 
 - **TranscriptionService Interface**: Standardized contract for all AI services
-- **Service Adapters**: Individual implementations for each AI provider
+- **Service Adapters**: Individual implementations for each AI provider.
+  - **URL-based**: OpenAI and AssemblyAI adapters accept audio URLs directly.
+  - **Stream-based**: Gemini and ElevenLabs adapters stream audio from the server to the AI service, avoiding loading large files into memory.
 - **TranscriptionOrchestrator**: Manages multiple service calls
-- **FileStorageService**: DigitalOcean Spaces integration
+- **FileStorageService**: DigitalOcean Spaces integration for storing audio files.
 - **Analysis Framework**: Extensible interface for future features
 
 ### Technology Stack

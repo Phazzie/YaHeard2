@@ -1,12 +1,11 @@
 const TranscriptionService = require('../services/TranscriptionService')
 const axios = require('axios')
 const FormData = require('form-data')
-const fs = require('fs')
 
 class GeminiAdapter extends TranscriptionService {
   constructor (config) {
     super(config)
-    this.serviceName = 'Gemini 2.5 Flash'
+    this.serviceName = 'Gemini 2.5 Pro'
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta'
 
     if (config.apiKey) {
@@ -32,11 +31,11 @@ class GeminiAdapter extends TranscriptionService {
 
       // Then transcribe using the uploaded file
       const response = await axios.post(
-        `${this.baseUrl}/models/gemini-2.0-flash-exp:generateContent?key=${this.apiKey}`,
+        `${this.baseUrl}/models/gemini-2.5-pro:generateContent?key=${this.apiKey}`,
         {
           contents: [{
             parts: [{
-              text: 'Please transcribe this audio file accurately. Return only the transcribed text.'
+              text: 'Transcribe the following audio file. Provide only the text of the transcription.'
             }, {
               file_data: {
                 mime_type: uploadedFile.mimeType,
@@ -59,7 +58,7 @@ class GeminiAdapter extends TranscriptionService {
       }
 
       return this.formatResult(transcription, {
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-2.5-pro',
         fileUri: uploadedFile.uri
       })
     } catch (error) {
@@ -69,24 +68,13 @@ class GeminiAdapter extends TranscriptionService {
 
   async uploadAudioFile (audioUrl) {
     try {
-      let audioData
-      let mimeType = 'audio/mpeg' // default
-
-      if (audioUrl.startsWith('http')) {
-        const response = await axios.get(audioUrl, { responseType: 'arraybuffer' })
-        audioData = response.data
-        mimeType = response.headers['content-type'] || 'audio/mpeg'
-      } else {
-        audioData = fs.readFileSync(audioUrl)
-        // Determine mime type from file extension
-        if (audioUrl.endsWith('.wav')) mimeType = 'audio/wav'
-        if (audioUrl.endsWith('.mp3')) mimeType = 'audio/mpeg'
-        if (audioUrl.endsWith('.m4a')) mimeType = 'audio/mp4'
-      }
+      // Get a stream from the URL
+      const response = await axios.get(audioUrl, { responseType: 'stream' })
+      const mimeType = response.headers['content-type'] || 'application/octet-stream'
 
       // Upload to Gemini File API
       const formData = new FormData()
-      formData.append('file', audioData, {
+      formData.append('file', response.data, {
         contentType: mimeType,
         filename: 'audio_file'
       })

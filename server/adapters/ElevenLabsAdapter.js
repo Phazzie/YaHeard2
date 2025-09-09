@@ -1,7 +1,6 @@
 const TranscriptionService = require('../services/TranscriptionService')
 const axios = require('axios')
 const FormData = require('form-data')
-const fs = require('fs')
 
 class ElevenLabsAdapter extends TranscriptionService {
   constructor (config) {
@@ -27,18 +26,14 @@ class ElevenLabsAdapter extends TranscriptionService {
     try {
       const validatedOptions = this.validateOptions(options)
 
-      let audioData
-      if (audioUrl.startsWith('http')) {
-        const response = await axios.get(audioUrl, { responseType: 'arraybuffer' })
-        audioData = response.data
-      } else {
-        audioData = fs.readFileSync(audioUrl)
-      }
+      // Get a stream from the URL
+      const responseStream = await axios.get(audioUrl, { responseType: 'stream' })
+      const mimeType = responseStream.headers['content-type'] || 'audio/mpeg'
 
       const formData = new FormData()
-      formData.append('audio', audioData, {
+      formData.append('audio', responseStream.data, {
         filename: 'audio.mp3',
-        contentType: 'audio/mpeg'
+        contentType: mimeType
       })
 
       // Add model and other parameters
@@ -78,18 +73,8 @@ class ElevenLabsAdapter extends TranscriptionService {
   }
 
   validateOptions (options) {
-    const validated = super.validateOptions(options)
-
-    // ElevenLabs specific validations
-    const supportedLanguages = [
-      'en', 'zh', 'de', 'hi', 'fr', 'ja', 'ko', 'pt', 'it', 'es', 'id', 'nl', 'tr', 'fil', 'pl', 'sv', 'bg', 'ro', 'ar', 'cs', 'el', 'fi', 'hr', 'ms', 'sk', 'da', 'ta', 'uk'
-    ]
-
-    if (validated.language && validated.language !== 'auto' && !supportedLanguages.includes(validated.language)) {
-      validated.language = 'auto'
-    }
-
-    return validated
+    // No specific validation needed for ElevenLabs, a part from the base validation.
+    return super.validateOptions(options)
   }
 }
 

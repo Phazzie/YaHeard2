@@ -63,18 +63,8 @@ class AssemblyAIAdapter extends TranscriptionService {
   }
 
   validateOptions (options) {
-    const validated = super.validateOptions(options)
-
-    // AssemblyAI specific validations
-    const supportedLanguages = [
-      'en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'hi', 'ja', 'zh', 'ko', 'ru'
-    ]
-
-    if (validated.language && validated.language !== 'auto' && !supportedLanguages.includes(validated.language)) {
-      validated.language = 'auto'
-    }
-
-    return validated
+    // No specific validation needed for AssemblyAI, a part from the base validation.
+    return super.validateOptions(options)
   }
 }
 
