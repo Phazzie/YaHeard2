@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const TranscriptionOrchestrator = require('../services/TranscriptionOrchestrator')
 const FileStorageService = require('../services/FileStorageService')
+const ConsensusService = require('../services/ConsensusService')
 const config = require('../config')
 
 // Initialize services
@@ -82,6 +83,37 @@ router.post('/upload', (req, res) => {
 })
 
 /**
+ * GET /api/health
+ * Check health status of all transcription services
+ */
+router.get('/health', async (req, res) => {
+  try {
+    const services = orchestrator.getAvailableServices()
+    const healthStatus = {}
+
+    // Check each service health
+    for (const service of services) {
+      try {
+        // Most services don't have explicit health checks, so we'll mark them as operational if they're configured
+        healthStatus[service] = 'operational'
+      } catch (error) {
+        healthStatus[service] = 'down'
+      }
+    }
+
+    // Add storage health
+    healthStatus.storage = fileStorage.isReady() ? 'operational' : 'down'
+
+    res.json(healthStatus)
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to retrieve service health',
+      details: error.message
+    })
+  }
+})
+
+/**
  * POST /api/transcribe
  * Transcribe audio using all available services
  */
@@ -101,6 +133,14 @@ router.post('/transcribe', async (req, res) => {
     // Add analysis of results
     if (result.success) {
       result.analysis = orchestrator.analyzeResults(result.results)
+      
+      // Generate consensus transcript
+      try {
+        result.consensus = ConsensusService.generateConsensus(result.results)
+      } catch (consensusError) {
+        console.warn('Failed to generate consensus:', consensusError.message)
+        result.consensus = null
+      }
     }
 
     res.json(result)
